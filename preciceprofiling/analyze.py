@@ -117,6 +117,10 @@ def runAnalyze(ns):
 
 
 def analyzeCommand(profilingfile, participant, event, outfile=None, unit="us"):
+    # Translate display name "total" back to internal name "_GLOBAL"
+    if event == "total":
+        event = "_GLOBAL"
+
     run = Run(profilingfile)
 
     participants = run.participants()
