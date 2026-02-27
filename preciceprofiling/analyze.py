@@ -11,7 +11,13 @@ def makeAnalyzeParser(add_help: bool = True):
     Parallel solvers show events of the primary rank next to the secondary ranks spending the least and most time in advance of preCICE.
     """
     analyze = argparse.ArgumentParser(description=analyze_help, add_help=add_help)
-    analyze.add_argument("participant", type=str, nargs="?", default=None, help="The participant to analyze. If omitted, all participants are analyzed.")
+    analyze.add_argument(
+        "participant",
+        type=str,
+        nargs="?",
+        default=None,
+        help="The participant to analyze. If omitted, all participants are analyzed.",
+    )
     addInputArgument(analyze)
     addUnitArgument(analyze)
     analyze.add_argument(
