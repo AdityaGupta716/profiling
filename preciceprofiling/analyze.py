@@ -123,10 +123,8 @@ def runAnalyze(ns):
 
 
 def computeAnalysis(run, participant, event, unit="us"):
-    """Compute and print the analysis DataFrame for a single participant."""
+    """Compute the analysis DataFrame for a single participant."""
     df = run.toDataFrame(participant=participant)
-
-    print(f"Output timing are in {unit}.")
 
     dur_factor = 1000 * ns_to_unit_factor(unit)
     df = (
@@ -205,7 +203,6 @@ def computeAnalysis(run, participant, event, unit="us"):
             .collect()
         )
 
-    printWide(joined)
     return joined
 
 
@@ -217,6 +214,12 @@ def analyzeCommand(profilingfile, participant, event, outfile=None, unit="us"):
     run = Run(profilingfile)
     all_participants = run.participants()
 
+    assert participant is None or participant in all_participants, (
+        f"Given participant {participant} doesn't exist. Known: " + ", ".join(all_participants)
+    )
+
+    print(f"Output timings are in {unit}.")
+
     if participant is None:
         if outfile is not None:
             print(
@@ -227,16 +230,11 @@ def analyzeCommand(profilingfile, participant, event, outfile=None, unit="us"):
             return 1
         for p in all_participants:
             print(f"\n=== Participant: {p} ===")
-            computeAnalysis(run, p, event, unit)
+            printWide(computeAnalysis(run, p, event, unit))
         return 0
 
-    assert (
-        participant in all_participants
-    ), f"Given participant {participant} doesn't exist. Known: " + ", ".join(
-        all_participants
-    )
-
     joined = computeAnalysis(run, participant, event, unit)
+    printWide(joined)
 
     if outfile:
         print(f"Writing to {outfile}")
