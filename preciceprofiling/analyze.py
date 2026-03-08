@@ -214,8 +214,10 @@ def analyzeCommand(profilingfile, participant, event, outfile=None, unit="us"):
     run = Run(profilingfile)
     all_participants = run.participants()
 
-    assert participant is None or participant in all_participants, (
-        f"Given participant {participant} doesn't exist. Known: " + ", ".join(all_participants)
+    assert (
+        participant is None or participant in all_participants
+    ), f"Given participant {participant} doesn't exist. Known: " + ", ".join(
+        all_participants
     )
 
     print(f"Output timings are in {unit}.")
