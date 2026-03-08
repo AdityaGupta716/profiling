@@ -122,40 +122,12 @@ def runAnalyze(ns):
     )
 
 
-def analyzeCommand(profilingfile, participant, event, outfile=None, unit="us"):
-    # Translate display name "total" back to internal name "_GLOBAL"
-    if event == "total":
-        event = "_GLOBAL"
-
-    run = Run(profilingfile)
-
-    all_participants = run.participants()
-
-    if participant is None:
-        if outfile is not None:
-            print(
-                "Error: --output requires a specific participant. "
-                "Use `analyze <participant> --output <file>`.",
-                file=sys.stderr,
-            )
-            return 1
-        for p in all_participants:
-            print(f"\n=== Participant: {p} ===")
-            analyzeCommand(profilingfile, p, event, None, unit)
-        return 0
-
-    assert (
-        participant in all_participants
-    ), f"Given participant {participant} doesn't exist. Known: " + ", ".join(
-        all_participants
-    )
-
+def computeAnalysis(run, participant, event, unit="us"):
+    """Compute and print the analysis DataFrame for a single participant."""
     df = run.toDataFrame(participant=participant)
 
     print(f"Output timing are in {unit}.")
 
-    # Filter by participant
-    # Convert duration to requested unit
     dur_factor = 1000 * ns_to_unit_factor(unit)
     df = (
         df.filter(pl.col("participant") == participant)
@@ -234,6 +206,37 @@ def analyzeCommand(profilingfile, participant, event, outfile=None, unit="us"):
         )
 
     printWide(joined)
+    return joined
+
+
+def analyzeCommand(profilingfile, participant, event, outfile=None, unit="us"):
+    # Translate display name "total" back to internal name "_GLOBAL"
+    if event == "total":
+        event = "_GLOBAL"
+
+    run = Run(profilingfile)
+    all_participants = run.participants()
+
+    if participant is None:
+        if outfile is not None:
+            print(
+                "Error: --output requires a specific participant. "
+                "Use `analyze <participant> --output <file>`.",
+                file=sys.stderr,
+            )
+            return 1
+        for p in all_participants:
+            print(f"\n=== Participant: {p} ===")
+            computeAnalysis(run, p, event, unit)
+        return 0
+
+    assert (
+        participant in all_participants
+    ), f"Given participant {participant} doesn't exist. Known: " + ", ".join(
+        all_participants
+    )
+
+    joined = computeAnalysis(run, participant, event, unit)
 
     if outfile:
         print(f"Writing to {outfile}")
