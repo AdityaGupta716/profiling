@@ -132,9 +132,16 @@ def analyzeCommand(profilingfile, participant, event, outfile=None, unit="us"):
     all_participants = run.participants()
 
     if participant is None:
+        if outfile is not None:
+            print(
+                "Error: --output requires a specific participant. "
+                "Use `analyze <participant> --output <file>`.",
+                file=sys.stderr,
+            )
+            return 1
         for p in all_participants:
             print(f"\n=== Participant: {p} ===")
-            analyzeCommand(profilingfile, p, event, outfile, unit)
+            analyzeCommand(profilingfile, p, event, None, unit)
         return 0
 
     assert (
